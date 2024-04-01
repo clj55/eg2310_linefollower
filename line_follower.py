@@ -39,8 +39,9 @@ class Func(Node):
     def line_follower(self):
         twist = geometry_msgs.msg.Twist()
         rad_per_sec = 0.3
-        cent_per_sec = 0.03
-        rate = 1.08          
+        cent_per_sec = 0.1
+        turning_rate = 0.08 
+        linear_rate = 0.05
         try:
             while True:
                 ir1 = GPIO.input(ir1_pin)
@@ -51,13 +52,15 @@ class Func(Node):
                 
                 if ir1 == 1 and ir2 == 1:
                     twist.linear.x = 0.0
-                    twist.linear.z = 0.0
+                    twist.angular.z = 0.0
   
                 elif ir1 == 1 and ir2 == 0:
-                    twist.linear.z += rad_per_sec * rate
+                    twist.angular.z += rad_per_sec * turning_rate
+                    twist.linear.x += cent_per_sec * linear_rate
 
                 elif ir2 == 1 and ir1 == 0:
-                    twist.linear.z -= rad_per_sec * rate
+                    twist.linear.z -= rad_per_sec * turning_rate
+                    twist.linear.x += cent_per_sec * linear_rate
 
                 else: 
                     twist.linear.z = 0.0
