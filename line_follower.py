@@ -96,20 +96,22 @@ class Func(Node):
     def send_request(self, ip_address, ID):
         header = {'Content-Type': 'application/json'}
         endpoint = "http://" + ip_address + "/openDoor"
-        data = "action": "openDoor", "parameters": {"robotId": ID}}
+        data = {"action": "openDoor", "parameters": {"robotId": ID}}
         response = requests.post(url=endpoint, json=data, headers=header)
         return(response.text)
 
     # Function 4: Specific turns in radians (turning within its own space)
     def turn_specific(self, radian):
         twist = geometry_msgs.msg.Twist()
+        def stop():
+            twist.angular.z = 0.0
         if radian < 0:
             rad_per_sec = -0.3
         else:
             rad_per_sec = 0.3
         time_90 = abs(radian / rad_per_sec)
         twist.angular.z = rad_per_sec
-        th.Timer(time_90, twist.angular.z = 0.0)
+        Timer(time_90, stop())
 
     # Function 5: Marker Detector --> this one needs to be implemented with the Frontier and A* algo?
     def marker_detector(self):
