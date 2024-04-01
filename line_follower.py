@@ -40,7 +40,7 @@ class Func(Node):
         twist = geometry_msgs.msg.Twist()
         rad_per_sec = 0.3
         cent_per_sec = 0.03
-        rate = 0.1          
+        rate = 1.08          
         try:
             while True:
                 ir1 = GPIO.input(ir1_pin)
@@ -54,19 +54,13 @@ class Func(Node):
                     twist.linear.z = 0.0
   
                 elif ir1 == 1 and ir2 == 0:
-                    twist.linear.x -= cent_per_sec * rate
-                    twist.linear.z += rad_per_sec
-                    if twist.linear.x <= 0:
-                        twist.linear.x = 0
+                    twist.linear.z += rad_per_sec * rate
 
                 elif ir2 == 1 and ir1 == 0:
-                    twist.linear.x -= cent_per_sec * rate
-                    twist.linear.z -= rad_per_sec
-                    if twist.linear.x <= 0:
-                        twist.linear.x = 0
+                    twist.linear.z -= rad_per_sec * rate
 
                 else: 
-                    twist.linear.y = 0.0
+                    twist.linear.z = 0.0
                     twist.linear.x = cent_per_sec
                 
                 self.publisher_.publish(twist)
