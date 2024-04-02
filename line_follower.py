@@ -31,9 +31,11 @@ header = {'Content-Type': 'application/json'}
 # Class 1: Functionality of the turtleBot3 Burger
 class Func(Node):
     # initialiser
-    def __init__():
+    def __init__(self, ip_address, ID):
         super().__init__('mover')
         self.publisher_ = self.create_publisher(geometry_msgs.msg.Twist, 'cmd_vel', 10)
+        self.ip_address = ip_address
+        self.ID = ID
 
     # Function 1: Line_follower
     def line_follower(self):
@@ -93,25 +95,25 @@ class Func(Node):
         s2.ChangeDutyCycle(convert_ang_dc(0))
 
     # Function 3: HTTP request to ESP32 --> needs to be tested as I didn't test it as a function
-    def send_request(self, ip_address, ID):
+    def send_request(self):
         header = {'Content-Type': 'application/json'}
-        endpoint = "http://" + ip_address + "/openDoor"
-        data = {"action": "openDoor", "parameters": {"robotId": ID}}
+        endpoint = "http://" + self.ip_address + "/openDoor"
+        data = {"action": "openDoor", "parameters": {"robotId": self.ID}}
         response = requests.post(url=endpoint, json=data, headers=header)
         return(response.text)
 
     # Function 4: Specific turns in radians (turning within its own space)
-    def turn_specific(self, radian):
-        twist = geometry_msgs.msg.Twist()
-        def stop():
-            twist.angular.z = 0.0
-        if radian < 0:
-            rad_per_sec = -0.3
-        else:
-            rad_per_sec = 0.3
-        time_90 = abs(radian / rad_per_sec)
-        twist.angular.z = rad_per_sec
-        Timer(time_90, stop())
+    # def turn_specific(self, radian):
+    #     twist = geometry_msgs.msg.Twist()
+    #     def stop():
+    #         twist.angular.z = 0.0
+    #     if radian < 0:
+    #         rad_per_sec = -0.3
+    #     else:
+    #         rad_per_sec = 0.3
+    #     time_90 = abs(radian / rad_per_sec)
+    #     twist.angular.z = rad_per_sec
+    #     Timer(time_90, stop())
 
     # Function 5: Marker Detector --> this one needs to be implemented with the Frontier and A* algo?
     def marker_detector(self):
@@ -126,29 +128,11 @@ class Func(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    TurtleBot = Func()
-    # finds the marker
-    TurtleBot.marker_detector()
-    # sends HTTP request to determine which door to open
-    response = 'no'
-    while response == 'no':
-        response = TurtleBot.send_request(esp32_ip, turtleBot_ID)
-        if response == 'door1':
-            TurtleBot.turn_specific(math.pi / 2)
-            break
-        elif response == 'door2':
-            TurtleBot.turn_specific(- math.pi / 2)
-            break
-        else:
-            th.Timer(60, response = 'no')
-    # line follows to the bucket
-    TurtleBot.line_follower()
-    # dispense balls
-    TurtleBot.ball_dispenser()
-    # turns 180 degrees
-    TurtleBot.turn_specific(math.pi)
-    # follows line backward
-    TurtleBot.line_follower()
+    TurtleBot = Func(esp32_ip, turtleBot_ID)
+    response = TurtleBot.send_request()
+    print(response)
+    
+
     
 if __name__ == '__main__':
     main()
